@@ -3,12 +3,14 @@
 
 #include <QCoreApplication>
 #include <QString>
-#include <QSound>
 #include <QDebug>
-
+#include <QMediaPlayer>
+#include <QSound>
 #include <QtCore>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "whole.h"
 
 /**
  * @brief
@@ -18,11 +20,6 @@
  */
 
 
-//生产者-消费者 全局定义
-const int BufferSize = 1024;
-extern int voiceNeedPlay[BufferSize];
-extern QSemaphore FreeBytes;
-extern QSemaphore UsedBytes;
 
 class Voice : public QThread
 {
@@ -33,29 +30,37 @@ public:
     ~Voice();
     void play();
 
-    QString runPath;  //程序当前运行路径
-    QString absDir;  //实际需打开的路径
     QSound *bells;
 
  //bo fang yu yin xian cheng
     void run() override
     {
-        int i = 0;
+        QString runPath;  //程序当前运行路径
+        QString absDir;  //实际需打开的路径
+        QString index("");
+        int curIndexVoice = 0;
+        runPath = QCoreApplication::applicationDirPath();//获取当前exe所在路径
+        QMediaPlayer voiceSound;
+
         while(1)
         {
-            if(i >= BufferSize){
-                i = i % BufferSize;
+            if(curIndexVoice >= BufferSize){
+                curIndexVoice = curIndexVoice % BufferSize;
             }
-            UsedBytes.acquire();
-            runPath = QCoreApplication::applicationDirPath();//获取当前exe所在路径
-            absDir = runPath + "/XXX.wav";
-            int needPlay = 3; //
-            absDir.replace(QString("XXX"), QString(needPlay));
-            QSound::play(absDir);
+            WaitingVoiceNum.acquire();
+            int needPlay = voiceNeedPlay[curIndexVoice];
+            index.sprintf("/%d.wav", needPlay);
+            absDir = runPath + index;
 
-            FreeBytes.release();
-            i++;
-            QThread::sleep(2);
+            voiceSound.setMedia(QUrl::fromLocalFile(absDir));
+            voiceSound.play();
+
+            FreeSlots.release();
+            curIndexVoice++;
+
+            while(voiceSound.state() == QMediaPlayer::PlayingState){
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+            }
         }
     }
 };

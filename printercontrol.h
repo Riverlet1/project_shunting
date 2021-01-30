@@ -46,4 +46,6 @@ typedef struct shuntingData
 
 } shuntingData;
 
+extern char attention2[36];
+
 #endif // PRINTERCONTROL_H

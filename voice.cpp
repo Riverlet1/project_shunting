@@ -1,8 +1,5 @@
 #include "voice.h"
 
-int voiceNeedPlay[BufferSize];
-QSemaphore FreeBytes(BufferSize);
-QSemaphore UsedBytes;
 
 Voice::Voice()
 {
