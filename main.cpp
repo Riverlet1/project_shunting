@@ -14,12 +14,12 @@ int main(int argc, char *argv[])
     recvUdp = new QUdpSocket();
     bool result = recvUdp->bind(QHostAddress::LocalHost, 11001);
     qDebug() << "#### udp recv socket bind result:"<<result <<" ;current port:11001; #####";
-
     QObject::connect(recvUdp, &QUdpSocket::readyRead, &a, &recvData);
 
-    Voice voiceinstance;
-    voiceinstance.start();
-    //voiceinstance.wait();
+    //避免多次快速点击, 避免多次发送相同语音
+    QTimer *timer = new QTimer();
+    QObject::connect(timer, &QTimer::timeout, &a, &mainLoop);
+    timer->start(1000);
 
     return a.exec();
 }

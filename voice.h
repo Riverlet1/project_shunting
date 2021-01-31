@@ -21,9 +21,8 @@
 
 
 
-class Voice : public QThread
+class Voice
 {
-    Q_OBJECT
 
 public:
     explicit Voice();
@@ -33,35 +32,31 @@ public:
     QSound *bells;
 
  //bo fang yu yin xian cheng
-    void run() override
+    static void playVoice()
     {
         QString runPath;  //程序当前运行路径
         QString absDir;  //实际需打开的路径
         QString index("");
-        int curIndexVoice = 0;
+        static int curIndexVoice = 0;
         runPath = QCoreApplication::applicationDirPath();//获取当前exe所在路径
         QMediaPlayer voiceSound;
 
-        while(1)
-        {
-            if(curIndexVoice >= BufferSize){
-                curIndexVoice = curIndexVoice % BufferSize;
-            }
-            WaitingVoiceNum.acquire();
-            int needPlay = voiceNeedPlay[curIndexVoice];
-            index.sprintf("/%d.wav", needPlay);
-            absDir = runPath + index;
-
-            voiceSound.setMedia(QUrl::fromLocalFile(absDir));
-            voiceSound.play();
-
-            FreeSlots.release();
-            curIndexVoice++;
-
-            while(voiceSound.state() == QMediaPlayer::PlayingState){
-                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-            }
+        if(curIndexVoice >= BufferSize){
+            curIndexVoice = curIndexVoice % BufferSize;
         }
+        curIndexVoice = 2;
+        int needPlay = voiceNeedPlay[curIndexVoice] - 1;
+        index.sprintf("/%d.wav", needPlay);
+        absDir = runPath + index;
+        voiceSound.setMedia(QUrl::fromLocalFile(absDir));
+        voiceSound.play();
+        curIndexVoice++;
+
+        while(voiceSound.state() == QMediaPlayer::PlayingState)
+        {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        }
+
     }
 };
 

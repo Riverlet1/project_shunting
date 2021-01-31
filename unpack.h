@@ -59,13 +59,12 @@ void UnPackShuntingTable(unsigned char *package)
     {
         if(package[1] == 0xf0 && package[2] == 0x01 && package[3] == 0x06 && package[4] == 0x04)
         {
-            if(package[5] >= 0x00 && package[5] <= 160)
+            if(package[5] >= 0x01 && package[5] <= 160)
             {
+                curVoiceQueueIndex = 2;
                 if(curVoiceQueueIndex >= BufferSize)
                     curVoiceQueueIndex = curVoiceQueueIndex % BufferSize;
-                FreeSlots.acquire();
                 voiceNeedPlay[curVoiceQueueIndex] = package[5];
-                WaitingVoiceNum.release();
                 curVoiceQueueIndex++;
             }
         }
@@ -104,11 +103,13 @@ void UnPack(unsigned char *rawBuff)
     int gouIndex = 6+64+1;
     unsigned char packageUnit[MIN_UNIT_LEN];
 
-    if(rawBuff[gouIndex] == 0xc3)//yu yin
+    int voice_index = 7;
+
+    if(rawBuff[0] == 0xd1)//yu yin
     {
        needTodo = PLAY_VOICE;
        memset(packageUnit, 0, MIN_UNIT_LEN);
-       memcpy(packageUnit, &rawBuff[gouIndex], MIN_UNIT_LEN);
+       memcpy(packageUnit, &rawBuff[voice_index], MIN_UNIT_LEN);
        UnPackShuntingTable(packageUnit);
     }
     else

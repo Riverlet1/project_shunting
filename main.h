@@ -10,22 +10,30 @@
 #include "unpack.h"
 #include "whole.h"
 
+extern void SleepNoBlock(int msec);
 
-void processTheDatagram()
+void mainLoop()
 {
-
-    if(wholebuff.size() >= 512)
-    {
-        UnPack(reinterpret_cast<unsigned char *>(wholebuff.data()));
-    }
     if(needTodo == PRINT)
     {
         qDebug() << "im printing...";
         print_Printer();
-        extern void SleepNoBlock(int msec);
-        SleepNoBlock(1000);
     }
+    else if(needTodo == PLAY_VOICE)
+    {
+        Voice::playVoice();
+    }
+
+    //SleepNoBlock(1000);
     needTodo = DONOTHING;
+}
+
+void processTheDatagram()
+{
+    if(wholebuff.size() >= 512)
+    {
+        UnPack(reinterpret_cast<unsigned char *>(wholebuff.data()));
+    }   
 }
 
 void recvData()

@@ -7,7 +7,7 @@ TcpSocketClient::TcpSocketClient()
     connect(client, &QTcpSocket::readyRead, this, &TcpSocketClient::clientRecvData);
 
     QString IP = "localhost";
-    int port = 11000;
+    int port = 9100;
     client->connectToHost(IP, port);
 }
 
